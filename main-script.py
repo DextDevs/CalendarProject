@@ -4,7 +4,7 @@ import os.path
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow, Flow
+from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
@@ -155,9 +155,9 @@ def main():
       creds.refresh(Request())
     else:
       flow = InstalledAppFlow.from_client_secrets_file(
-        "credentials.json", SCOPES
+          "credentials.json", SCOPES
       )
-      creds = flow.run_local_server(host='0.0.0.0', port=8080)
+      creds = flow.run_local_server(port=0)
     # Save the credentials for the next run
     with open("token.json", "w") as token:
       token.write(creds.to_json())
@@ -219,7 +219,7 @@ main()
 def run_main():
     print("Rerunning")
     main()
-    root.after(300000, run_main)
+    root.after(100000, run_main)
 
 
 root.after(0, run_main)
