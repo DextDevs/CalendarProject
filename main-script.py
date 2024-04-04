@@ -8,6 +8,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+
 events_boardroom = ()
 
 current_date = datetime.now()
@@ -156,7 +157,7 @@ def main():
       flow = InstalledAppFlow.from_client_secrets_file(
           "credentials.json", SCOPES
       )
-      creds = flow.run_local_server(port=0)
+      creds = flow.run_console()
     # Save the credentials for the next run
     with open("token.json", "w") as token:
       token.write(creds.to_json())
@@ -218,7 +219,7 @@ main()
 def run_main():
     print("Rerunning")
     main()
-    root.after(100000, run_main)
+    root.after(300000, run_main)
 
 
 root.after(0, run_main)
