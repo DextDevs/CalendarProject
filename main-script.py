@@ -213,8 +213,6 @@ def clear_calendar(cell_labels):
     for cell in cell_labels.values():
         cell.config(text="", bg="white")
 
-main()
-
 
 def run_main():
     print("Rerunning")
