@@ -20,7 +20,7 @@ for i in range(0, 7):
 
 # Create the main window
 root = tk.Tk()
-root.title("Meeting Room Calendars")
+root.title("Meeting Room Calendar")
 
 # Get the screen resolution
 screen_width = root.winfo_screenwidth()
@@ -66,7 +66,7 @@ def create_calendar(title, frame, row, column):
                 time_label = tk.Label(frame, text=f"{hour}:00 {am_pm}", font=("Arial", 10), width=12)
                 time_label.grid(row=(row-8)*2+2, column=0, sticky="n")
             for col in range(1, 8):
-                cell = tk.Label(frame, relief=tk.SUNKEN, width=10, height=1)
+                cell = tk.Label(frame, relief=tk.SUNKEN, width=int(screen_width/8-10), height=1)
                 cell.grid(row=(row-8)*2+sub_row+2, column=col, sticky="nsew")
                 cell_labels[(row-8)*2+sub_row, col] = cell  # Store the cell label in the dictionary
 
@@ -79,24 +79,27 @@ def create_calendar(title, frame, row, column):
     return frame, cell_labels
 
 # Add sample meetings to the small meeting room calendar
-def add_small_room_meetings(cell_labels,events_small):
-    clear_calendar(cell_labels)
-    for event in events_small:
-      start_str = event["start"].get("dateTime", event["start"].get("date"))
-      end_str = event["end"].get("dateTime", event["end"].get("date"))
-      start_datetime = datetime.fromisoformat(start_str)
-      end_datetime = datetime.fromisoformat(end_str)
-      date = start_datetime.date()
-      difference = end_datetime - start_datetime
-      slot_total = int(difference / timedelta(minutes=30))
-      start_time = start_datetime.time()
-      start_hour = start_time.hour
-      start_minute = start_time.minute
-      start_slot = (start_hour - 8) * 2 + (1 if start_minute >= 30 else 0)
-      purpose = event["summary"]
-      days_till=(date - today_date).days
-      for num in range(slot_total):
-        cell_labels[(start_slot+num,days_till+1)].config(text=purpose,bg="lightgreen")
+# def add_small_room_meetings(cell_labels,events_small):
+#     clear_calendar(cell_labels)
+#     for event in events_small:
+#       start_str = event["start"].get("dateTime", event["start"].get("date"))
+#       end_str = event["end"].get("dateTime", event["end"].get("date"))
+#       start_datetime = datetime.fromisoformat(start_str)
+#       end_datetime = datetime.fromisoformat(end_str)
+#       date = start_datetime.date()
+#       difference = end_datetime - start_datetime
+#       slot_total = int(difference / timedelta(minutes=30))
+#       start_time = start_datetime.time()
+#       start_hour = start_time.hour
+#       start_minute = start_time.minute
+#       start_slot = (start_hour - 8) * 2 + (1 if start_minute >= 30 else 0)
+#       purpose = event["summary"]
+#       days_till=(date - today_date).days
+#       for num in range(slot_total):
+#         if start_slot+num < 0 or start_slot+num > 21:
+#            print("Out of range")
+#         else:
+#           cell_labels[(start_slot+num,days_till+1)].config(text=purpose,bg="lightgreen")
 
 # Add sample meetings to the boardroom calendar
 def add_boardroom_meetings(cell_labels,events_boardroom):
@@ -122,12 +125,12 @@ def add_boardroom_meetings(cell_labels,events_boardroom):
           cell_labels[(start_slot+num,days_till+1)].config(text=purpose,bg="lightgreen")
 
 # Create the calendars
-calendar_width = window_width // 2  # 50% of the screen width
+calendar_width = window_width # // 2   50% of the screen width
 calendar_height = window_height
 
-small_room_frame = tk.LabelFrame(calendar_frame, text="Small meeting room", width=calendar_width, height=calendar_height)
-small_room_frame.grid(row=0, column=0, sticky="nsew")
-small_room_frame, small_room_cell_labels = create_calendar("Small meeting room", small_room_frame, 0, 0)
+# small_room_frame = tk.LabelFrame(calendar_frame, text="Small meeting room", width=calendar_width, height=calendar_height)
+# small_room_frame.grid(row=0, column=0, sticky="nsew")
+# small_room_frame, small_room_cell_labels = create_calendar("Small meeting room", small_room_frame, 0, 0)
 
 boardroom_frame = tk.LabelFrame(calendar_frame, text="Boardroom", width=calendar_width, height=calendar_height)
 boardroom_frame.grid(row=0, column=1, sticky="nsew")
@@ -169,21 +172,21 @@ def main():
     now = datetime.now(timezone.utc).isoformat()  # 'Z' indicates UTC time
     sevenDaysDate = datetime.now(timezone.utc) + timedelta(days=6)
     sevenDaysDate = sevenDaysDate.isoformat()
-    events_result_small = (
-        service.events()
-        .list(
-            calendarId="dd9e04b947e71ac0067ce3aabdfd7d0061a06bb8a6bab33c5b78432b13794955@group.calendar.google.com", #Small meeting room
-            timeMin=now,
-            timeMax=sevenDaysDate,
-            singleEvents=True,
-            orderBy="startTime",
-        )
-        .execute()
-    )
+    # events_result_small = (
+    #     service.events()
+    #     .list(
+    #         calendarId="7c0aannk73j347segecfpqibri15ar6n@import.calendar.google.com", #Small meeting room
+    #         timeMin=now,
+    #         timeMax=sevenDaysDate,
+    #         singleEvents=True,
+    #         orderBy="startTime",
+    #     )
+    #     .execute()
+    # )
     events_result_boardroom = (
         service.events()
         .list(
-            calendarId="24ef60bc2555b748d4443501c952fccc520214d667049a32397d4a2ccf0b8a96@group.calendar.google.com", #Boardroom
+            calendarId="adoremeetingrooms@gmail.com", #Boardroom
             timeMin=now,
             timeMax=sevenDaysDate,
             singleEvents=True,
@@ -192,15 +195,16 @@ def main():
         .execute()
     )
     events_boardroom = events_result_boardroom.get("items", [])
-    events_small = events_result_small.get("items", [])
+    # events_small = events_result_small.get("items", [])
 
-    if not events_small:
-      print("No upcoming small room events found.")
-    else:
-       add_small_room_meetings(small_room_cell_labels,events_small)
+    # if not events_small:
+    #   print("No upcoming small room events found.")
+    # else:
+    #    add_small_room_meetings(small_room_cell_labels,events_small)
     
     if not events_boardroom:
       print("No upcoming boardroom events found.")
+      add_boardroom_meetings(boardroom_cell_labels,events_boardroom)
       return
     else:
        add_boardroom_meetings(boardroom_cell_labels,events_boardroom)
